@@ -49,14 +49,12 @@ def license_plate_process():
     while flag:
         img = cv2.imread('/home/pi/Desktop/ocr/testimg/bus/image.webp')
         highlight(getNumber(img))
+cv2.imshow("Webcam", getFrame())
 top = Tk()
 top.geometry("640x480")
 #style = Style(top)
 #style.theme_use('clam')
 
-host_ip = '192.168.62.137'
-port = 9999
-pass_lookup = {"Nevin": "12345678", "KL63H0395": "ajkajkajk"}
 x = 300
 y = 240
 Label(top, text='current network is : ' + current_wifi).pack()

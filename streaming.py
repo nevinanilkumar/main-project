@@ -1,9 +1,27 @@
 import subprocess
 import shlex, os
 import socket,cv2, pickle,struct
+from imutils.video import VideoStream
+
+# commands
+host_ip = '192.168.62.137'
+port = 9999
+pass_lookup = {"Nevin": "12345678", "KL63H0395": "ajkajkajk"}
+get_all_ssid_cmd = lambda : ['nmcli', '-f', 'SSID', 'dev', 'wifi']
+get_current_ssid_cmd = lambda : ['iwgetid', '-r']
+connect_network_cmd = lambda ssid, password : shlex.split(f"nmcli device wifi connect {ssid} password {password}")
+# start_stream_play_cmd = lambda ip, port : shlex.split()
+output = subprocess.check_output(get_all_ssid_cmd())
+output = output.decode('utf-8')
+
+networks = [i.strip() for i in output.split('\n')[1:] if i]
+networks = list(set(networks))
+# current wifi network
+output = subprocess.check_output(get_current_ssid_cmd()).decode('utf-8')
+current_wifi = output.strip()
+camera = VideoStream(-1,resolution=(280,280),framerate=24).start()
 
 def start_stream(host_ip, port):
-    print("start stream")
     client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     client_socket.connect((host_ip,port)) 
     data = b""
@@ -34,23 +52,14 @@ def start_stream(host_ip, port):
     client_socket.close()
 
 def connect_wifi(ssid, password):
-	global current_wifi
-	if (ssid != current_wifi):
-        	subprocess.check_output(connect_network_cmd(ssid, password))
-        	current_wifi = ssid
+        global current_wifi
+        if (ssid != current_wifi):
+                subprocess.check_output(connect_network_cmd(ssid, password))
+                current_wifi = ssid
 def getFrame():
-  pass  
-# commands
-get_all_ssid_cmd = lambda : ['nmcli', '-f', 'SSID', 'dev', 'wifi']
-get_current_ssid_cmd = lambda : ['iwgetid', '-r']
-connect_network_cmd = lambda ssid, password : shlex.split(f"nmcli device wifi connect {ssid} password {password}")
-# start_stream_play_cmd = lambda ip, port : shlex.split()
-output = subprocess.check_output(get_all_ssid_cmd())
-output = output.decode('utf-8')
+        ret, frame = camera.read()
+        if not ret:
+                print("Failed to capture frame")
+                return None
+        else: return frame
 
-networks = [i.strip() for i in output.split('\n')[1:] if i]
-networks = list(set(networks))
-# current wifi network
-output = subprocess.check_output(get_current_ssid_cmd()).decode('utf-8')
-current_wifi = output.strip()
-# cam = VideoCapture(0)
