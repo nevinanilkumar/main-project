@@ -6,7 +6,7 @@ import RPi.GPIO as GPIO
 import threading as thread
 
 from streaming import *
-from ocr import getNumber
+from ocr import getNumber, show_img
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_UP) # Up button
@@ -40,16 +40,19 @@ def set_focus(event, buttons):
 def button_pressed(event):
     current_focus = top.focus_get()
     current_focus.invoke()
+
 def highlight(number):
     global ssid_button
     if number in ssid_button: ssid_button[number].focus()
     else: print('no network found', number)
+
 def license_plate_process():
     global flag
     while flag:
-        img = cv2.imread('/home/pi/Desktop/ocr/testimg/bus/image.webp')
-        highlight(getNumber(img))
-cv2.imshow("Webcam", getFrame())
+        img = getFrame()
+        number = getNumber(img)
+        print("got ", number)
+        highlight(number)
 top = Tk()
 top.geometry("640x480")
 #style = Style(top)
